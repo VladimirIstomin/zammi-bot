@@ -1,0 +1,1 @@
+exports.greetings = 'Hello, user! I\'m handling some of your massages';
