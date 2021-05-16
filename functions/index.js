@@ -23,7 +23,6 @@ const { repeatReminderKeyboard } = require('./keyboards/repeatReminder');
 const {
   TELEGRAM_BOT_TOKEN,
   SERVER_URL,
-  SECRET_PATH
 } = process.env;
 
 admin.initializeApp({
@@ -55,13 +54,11 @@ app.use(express.urlencoded({extended: true}));
 
 const telegramAPI = 'https://api.telegram.org/'
 
-fetch(`${telegramAPI}bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${SERVER_URL}${SECRET_PATH}`)
+fetch(`${telegramAPI}bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${SERVER_URL}`)
   .then(res => {
     console.log('Setting webhook status: ', res.status);
   })
   .catch(e => console.log(e));
-
-app.use(bot.webhookCallback(SECRET_PATH));
 
 app.post('/', (req, res) => {
   bot.handleUpdate(req.body);
