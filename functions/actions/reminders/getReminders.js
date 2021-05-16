@@ -1,4 +1,4 @@
-exports.getReminders = async function() {
+exports.getReminders = function() {
   return {
     "1": {
       index: 1,

@@ -85,16 +85,16 @@ exports.createMailing = function(botContext) {
 }
 
 
-function backToMainMenu(ctx) {
-  ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
+async function backToMainMenu(ctx) {
+  await ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
 
   return ctx.scene.leave();
 }
 
 
-function handleStopMailing(ctx) {
+async function handleStopMailing(ctx) {
   if (ctx.message.text === '/stopMailing') {
-    backToMainMenu(ctx);
+    await backToMainMenu(ctx);
 
     return true;
   } else {

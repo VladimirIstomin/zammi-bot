@@ -3,9 +3,9 @@ const constants = require('../constants');
 
 
 exports.mainMenuKeyboard = function() {
-  button = Markup.urlButton(constants.goToWebsite, constants.websiteUrl);
+  const button = Markup.urlButton(constants.goToWebsite, constants.websiteUrl);
 
-  keyboard = Extra.markup(Markup.inlineKeyboard([button]));
+  const keyboard = Extra.markup(Markup.inlineKeyboard([button]));
 
   return keyboard;
 }
