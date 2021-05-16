@@ -6,24 +6,6 @@ const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
 const {sendMailing} = require('./sendMailing');
 
 
-function backToMainMenu(ctx) {
-  ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
-
-  return ctx.scene.leave();
-}
-
-
-function handleStopMailing(ctx) {
-  if (ctx.message.text === '/stopMailing') {
-    backToMainMenu(ctx);
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-
 exports.createMailing = function(botContext) {
   const createMailingScene = new WizardScene(
     'CREATE_MAILING_SCENE',
@@ -100,4 +82,22 @@ exports.createMailing = function(botContext) {
   );
 
   return createMailingScene
+}
+
+
+function backToMainMenu(ctx) {
+  ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
+
+  return ctx.scene.leave();
+}
+
+
+function handleStopMailing(ctx) {
+  if (ctx.message.text === '/stopMailing') {
+    backToMainMenu(ctx);
+
+    return true;
+  } else {
+    return false;
+  }
 }

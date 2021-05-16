@@ -10,9 +10,12 @@ const { checkUserExists } = require('./actions/user/checkUserExists');
 const serviceAccount = require('./serviceAccountKey.json');
 const { authorize } = require('./actions/admin/access/authorize');
 const { mainMenuKeyboard } = require('./keyboards/mainMenu');
-const { setNewPassword } = require('./actions/admin/access/setNewPassword');
+const { setAdminPassword } = require('./actions/admin/access/setAdminPassword');
 const { createMailing } = require('./actions/admin/mailing/createMailing');
-const { stopAllReminders } = require('./actions/user/stopAllReminders');
+const { stopAllReminders } = require('./actions/reminders/stopAllReminders');
+const { handleNewReminders } = require('./actions/reminders/handleNewReminders');
+const { remind } = require('./actions/reminders/remind');
+const { setReminders } = require('./actions/reminders/setReminders');
 
 //#region Basic bot, express and functions configuration
 
@@ -30,7 +33,15 @@ const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
 const botContext = bot.context;
 bot.context.admins = [];
 
-const stage = new Stage([authorize(botContext), setNewPassword(botContext), createMailing(botContext)]);
+const stage = new Stage(
+  [
+    authorize(botContext),
+    setAdminPassword(botContext),
+    createMailing(botContext),
+    setReminders()
+  ]
+);
+
 bot.use(session());
 bot.use(stage.middleware());
 bot.use()
@@ -81,9 +92,11 @@ bot.command('stopreminders', async ctx => {
   ctx.replyWithHTML(constants.remindersDeleted);
 });
 
+bot.command('setreminders', ctx => ctx.scene.enter('SET_REMINDERS_SCENE'));
+
 bot.command('admin', ctx => ctx.scene.enter('ADMIN_SCENE'));
 
-bot.command('setNewPassword', ctx => ctx.scene.enter('SET_NEW_PASSWORD_SCENE'));
+bot.command('setNewPassword', ctx => ctx.scene.enter('SET_ADMIN_PASSWORD_SCENE'));
 
 bot.command('createMailing', ctx => ctx.scene.enter('CREATE_MAILING_SCENE'));
 
@@ -92,3 +105,7 @@ bot.launch();
 //#endregion
 
 exports.app = functions.https.onRequest(app);
+exports.remind = functions.pubsub.schedule('0 12 * * *').timeZone('Europe/Moscow').onRun(() => {
+  bot.telegram.sendMessage(188855739, 'Oh, hi!');
+  return null;
+});

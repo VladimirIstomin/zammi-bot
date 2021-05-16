@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const {telegramAPITimer} = require('../../timer/telegramAPITimer');
 
 
 exports.sendMailing = async function(ctx) {
@@ -11,15 +12,10 @@ exports.sendMailing = async function(ctx) {
     const userIdsArray = [];
 
     if (!users.empty) {
-      users.forEach(user => {
-        userIdsArray.push(+user.id);
-      });
+      users.forEach(user => userIdsArray.push(+user.id));
     }
 
     const mailing = ctx.wizard.state;
-
-    // telegram api could be called only 30 times in a second, so to make a mailing we need to wait about 40ms between each mail
-    const telegramAPItimer = () => new Promise(res => setTimeout(res, 50));
 
     if ('photo' in mailing) {
       for (const userId of userIdsArray) {
@@ -35,11 +31,12 @@ exports.sendMailing = async function(ctx) {
       for (const userId of userIdsArray) {
         try {
           ctx.telegram.sendMessage(userId, mailing.text, {parse_mode: 'HTML'});
-        } catch {
+        } catch (e) {
+          console.log(e);
           throw new Error(`User with id ${userId} didn't get mailing`);
         }
 
-        await telegramAPItimer();
+        await telegramAPITimer();
       }
     }
 
