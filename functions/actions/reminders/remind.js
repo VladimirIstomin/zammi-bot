@@ -29,7 +29,6 @@ exports.remind = async function(bot) {
       for (const reminder of userReminders) {
         if (reminder.dateToRemind === today) {
           try {
-            console.log(completeActionKeyboard(reminder.index));
             bot.telegram.sendMessage(
               user.id,
               reminders[String(reminder.index)].reminderText,

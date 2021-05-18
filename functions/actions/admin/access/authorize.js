@@ -1,13 +1,12 @@
-const {ADMIN_SECRET_CODE} = process.env;
-const WizardScene = require('telegraf/scenes/wizard');
-const {checkAdminPassword} = require('./checkAdminPassword');
-const constants = require('../../../constants'); 
-const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
-const {setAdminRights} = require('./setAdminRights');
-const {getAdmins} = require('./getAdmins');
-
-
 exports.authorize = function(botContext) {
+  const {ADMIN_SECRET_CODE} = process.env;
+  const WizardScene = require('telegraf/scenes/wizard');
+  const {checkAdminPassword} = require('./checkAdminPassword');
+  const constants = require('../../../constants'); 
+  const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
+  const {setAdminRights} = require('./setAdminRights');
+  const {getAdmins} = require('./getAdmins');
+
   const adminScene = new WizardScene(
     'ADMIN_SCENE',
     async ctx => {
