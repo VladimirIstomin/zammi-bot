@@ -2,8 +2,8 @@ const {Markup, Extra} = require('telegraf');
 const constants = require('../constants');
 
 
-exports.repeatReminderKeyboard = function(reminderIndex) {
-  const repeatReminder = Markup.callbackButton(constants.repeatReminder, `repeatReminder_${reminderIndex}`);
+exports.repeatReminderKeyboard = function(reminderId) {
+  const repeatReminder = Markup.callbackButton(constants.repeatReminder, `rep_${reminderId}`);
 
   keyboard = Extra.markup(Markup.inlineKeyboard([repeatReminder]));
 

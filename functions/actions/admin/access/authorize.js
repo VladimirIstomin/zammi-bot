@@ -15,7 +15,8 @@ exports.authorize = function(botContext) {
       }
 
       if (botContext.admins.includes(ctx.update.message.chat.id)) {
-        ctx.replyWithHTML(constants.alreadyHasAdminRights);
+        await ctx.replyWithHTML(constants.alreadyHasAdminRights);
+        await ctx.replyWithHTML(constants.adminCommands);
 
         ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
 
@@ -29,13 +30,12 @@ exports.authorize = function(botContext) {
     async ctx => {
       ctx.deleteMessage();
       const isRightPassword = await checkAdminPassword(ctx.message.text);
-      
-      console.log(isRightPassword);
 
       if (isRightPassword || ctx.message.text === ADMIN_SECRET_CODE) {
         setAdminRights(ctx, botContext);
 
-        ctx.replyWithHTML(constants.passwordApproved)
+        ctx.replyWithHTML(constants.passwordApproved);
+        ctx.replyWithHTML(constants.adminCommands);
       } else {
         ctx.replyWithHTML(constants.passwordError);
       }

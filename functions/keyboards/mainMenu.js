@@ -1,11 +1,12 @@
-const {Markup, Extra} = require('telegraf');
-const constants = require('../constants');
+const {Markup} = require('telegraf');
 
 
 exports.mainMenuKeyboard = function() {
-  const button = Markup.urlButton(constants.goToWebsite, constants.websiteUrl);
-
-  const keyboard = Extra.markup(Markup.inlineKeyboard([button]));
-
-  return keyboard;
+  return Markup.keyboard([
+    ['О Zammi'],
+    ['🌿 Наши растения 🌿'],
+    ['🌱 Наши услуги 🌱'],
+    ['🌳 Уход за растениями 🌳'],
+    ['⏰ Напоминания ⏰']
+  ]).resize().extra();
 }

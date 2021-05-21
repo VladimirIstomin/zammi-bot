@@ -1,6 +1,5 @@
 const admin = require('firebase-admin');
 const {convertDate} = require('./convertDate');
-const {getReminders} = require('./getReminders');
 const {telegramAPITimer} = require('../timer/telegramAPITimer');
 const {deleteReminder} = require('./deleteReminder');
 const {completeActionKeyboard} = require('../../keyboards/completeAction');
@@ -13,32 +12,50 @@ exports.remind = async function(bot) {
     let today = Date.now();
     today = convertDate(today);
 
-    const reminders = getReminders();
-
     const usersRef = db.collection('users').where('reminders', '!=', []);
-    const usersWithReminders = await usersRef.get();
-    const userWithRemindersArray = [];
+    const usersWithRemindersFirestoreObject = await usersRef.get();
+    const userWithReminders = [];
 
-    if (!usersWithReminders.empty) {
-      usersWithReminders.forEach(user => userWithRemindersArray.push(user));
+    if (!usersWithRemindersFirestoreObject.empty) {
+      usersWithRemindersFirestoreObject.forEach(user => userWithReminders.push(user.data()));
     }
 
-    for (const user of userWithRemindersArray) {
-      const userReminders = user.data().reminders;
+    const remindersRef = db.collection('reminders');
+    const remindersFirestoreObject = await remindersRef.get();
+    const allReminders = [];
 
-      for (const reminder of userReminders) {
-        if (reminder.dateToRemind === today) {
+    if (!remindersFirestoreObject.empty) {
+      remindersFirestoreObject.forEach(reminder => allReminders.push({id: reminder.id, ...reminder.data()}));
+    } else {
+      console.log('There are no reminders');
+      return false
+    }
+    
+    for (const user of userWithReminders) {
+      const userReminders = user.reminders;
+
+      for (const userReminder of userReminders) {
+        if (userReminder.dateToRemind === today) {
           try {
+            let reminderText;
+
+            for (let reminder of allReminders) {
+              if (reminder.id === userReminder.id) {
+                reminderText = reminder.reminderText;
+                break;
+              }
+            }
+
             bot.telegram.sendMessage(
               user.id,
-              reminders[String(reminder.index)].reminderText,
-              completeActionKeyboard(reminder.index)
-            ); // change index with some id
+              reminderText,
+              completeActionKeyboard(userReminder.id)
+            );
             
-            const res = await deleteReminder(user.id, reminder);
+            const res = await deleteReminder(user.id, userReminder);
 
             if (!res) {
-              throw new Error(`The reminder with index ${reminder.index} of user with id ${user.id} wasn't deleted`);
+              throw new Error(`The reminder with id ${userReminder.id} of user with id ${user.id} wasn't deleted`);
             }
 
           } catch (e) {
