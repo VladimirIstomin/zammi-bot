@@ -3,7 +3,7 @@ const {deleteAllAdminRights} = require('./deleteAllAdminRights.js');
 const bcrypt = require('bcrypt');
 
 
-exports.handleNewAdminPassword = function(ctx, botContext) {
+exports.handleNewAdminPassword = function(ctx) {
   try {
     const saltRounds = 10;
 
@@ -22,7 +22,8 @@ exports.handleNewAdminPassword = function(ctx, botContext) {
       return true;
     });
     
-    deleteAllAdminRights(botContext);
+    await deleteAllAdminRights();
+    
     return true;
   } catch (e) {
     console.log(e);

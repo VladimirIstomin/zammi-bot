@@ -1,12 +1,13 @@
 const {Markup} = require('telegraf');
+const constants = require('../constants');
 
 
 exports.mainMenuKeyboard = function() {
   return Markup.keyboard([
-    ['О Zammi'],
-    ['🌿 Наши растения 🌿'],
-    ['🌱 Наши услуги 🌱'],
-    ['🌳 Уход за растениями 🌳'],
-    ['⏰ Напоминания ⏰']
+    [constants.aboutButton],
+    [constants.ourPlantsButton],
+    [constants.ourServicesButton],
+    [constants.plantCareButton],
+    [constants.remindersButton]
   ]).resize().extra();
 }

@@ -2,18 +2,15 @@ const WizardScene = require('telegraf/scenes/wizard');
 const constants = require('../../../constants');
 const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
 const {handleNewAdminPassword} = require('./handleNewAdminPassword');
-const {getAdmins} = require('./getAdmins');
 
 
-exports.setAdminPassword = function(botContext) {
+exports.setAdminPassword = function() {
   const setAdminPasswordScene = new WizardScene(
     'SET_ADMIN_PASSWORD_SCENE',
     async ctx => {
-      if (botContext.admins.length === 0) {
-        await getAdmins(botContext);
-      }
+      const admins = ctx.wizard.state.admins;
 
-      if (botContext.admins.includes(ctx.update.message.chat.id)) {
+      if (admins.includes(ctx.update.message.chat.id)) {
         ctx.replyWithHTML(constants.requestNewPassword);
 
         return ctx.wizard.next();
@@ -29,7 +26,7 @@ exports.setAdminPassword = function(botContext) {
     async ctx => {
       ctx.deleteMessage();
       
-      if (handleNewAdminPassword(ctx, botContext)) {
+      if (handleNewAdminPassword(ctx)) {
         await ctx.replyWithHTML(constants.newPasswordSuccess);
       } else {
         await ctx.replyWithHTML(constants.newPasswordFailure);

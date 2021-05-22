@@ -6,7 +6,6 @@ async function createUser(userId) {
   
     data = {
       id: userId,
-      type: 'user',
       reminders: [],
     }
   

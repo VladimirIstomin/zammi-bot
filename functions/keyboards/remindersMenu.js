@@ -1,10 +1,11 @@
 const {Markup} = require('telegraf');
+const constants = require('../constants');
 
 
 exports.remindersMenuKeyboard = function() {
   return Markup.keyboard([
-    ['📌 Установить напоминания'],
-    ['🚫 Удалить все напоминания'],
-    ['🔙 В главное меню']
+    [constants.setRemindersButton],
+    [constants.deleteAllRemindersButton],
+    [constants.backToMainMenuButton]
   ]).resize().extra();
 }

@@ -1,20 +1,17 @@
 const WizardScene = require('telegraf/scenes/wizard');
 const constants = require('../../../constants');
-const {getAdmins} = require('../access/getAdmins');
 const {mailingKeyboard} = require('../../../keyboards/mailing');
 const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
 const {sendMailing} = require('./sendMailing');
 
 
-exports.createMailing = function(botContext) {
+exports.createMailing = function() {
   const createMailingScene = new WizardScene(
     'CREATE_MAILING_SCENE',
     async ctx => {
-      if (botContext.admins.length === 0) {
-        await getAdmins(botContext);
-      }
+      const admins = ctx.wizard.state.admins;
 
-      if (botContext.admins.includes(ctx.update.message.chat.id)) {
+      if (admins.includes(ctx.update.message.chat.id)) {
         ctx.replyWithHTML(constants.requestMailingText);
 
         return ctx.wizard.next();

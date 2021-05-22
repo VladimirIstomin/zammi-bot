@@ -16,7 +16,7 @@ exports.setReminders = function() {
     async ctx => {
       let option = ctx.message.text;
 
-      if (option === '🔙 В главное меню') {
+      if (option === constants.backToMainMenuButton) {
         ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
 
         return ctx.scene.leave();
