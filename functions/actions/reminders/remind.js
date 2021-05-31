@@ -1,8 +1,8 @@
 const admin = require('firebase-admin');
-const {convertDate} = require('./convertDate');
-const {telegramAPITimer} = require('../timer/telegramAPITimer');
-const {deleteReminder} = require('./deleteReminder');
-const {completeActionKeyboard} = require('../../keyboards/completeAction');
+const { convertDate } = require('./convertDate');
+const { telegramAPITimer } = require('../timer/telegramAPITimer');
+const { deleteReminder } = require('./deleteReminder');
+const { completeActionKeyboard } = require('../../keyboards/completeAction');
 
 
 exports.remind = async function(bot) {
@@ -14,6 +14,7 @@ exports.remind = async function(bot) {
 
     const usersRef = db.collection('users').where('reminders', '!=', []);
     const usersWithRemindersFirestoreObject = await usersRef.get();
+
     const userWithReminders = [];
 
     if (!usersWithRemindersFirestoreObject.empty) {
@@ -21,13 +22,15 @@ exports.remind = async function(bot) {
     }
 
     const remindersRef = db.collection('reminders');
-    const remindersFirestoreObject = await remindersRef.get();
+    const remindersFirestoreObject = await remindersRef.get(); // pass them as argument
+
     const allReminders = [];
 
     if (!remindersFirestoreObject.empty) {
       remindersFirestoreObject.forEach(reminder => allReminders.push({id: reminder.id, ...reminder.data()}));
     } else {
-      console.log('There are no reminders');
+      console.log('Remind function error: There are no reminders');
+
       return false
     }
     
@@ -55,12 +58,11 @@ exports.remind = async function(bot) {
             const res = await deleteReminder(user.id, userReminder);
 
             if (!res) {
-              throw new Error(`The reminder with id ${userReminder.id} of user with id ${user.id} wasn't deleted`);
+              console.log(`Send reminder error: The reminder with id ${userReminder.id} of user with id ${user.id} wasn't deleted`);
             }
 
           } catch (e) {
             console.log(e);
-            throw new Error(`Unable to send message to user with id ${user.id}`);
           }
         }
 
@@ -71,6 +73,7 @@ exports.remind = async function(bot) {
     return true;
   } catch (e) {
     console.log(e);
+
     return false;
   }
 };

@@ -1,8 +1,8 @@
 const WizardScene = require('telegraf/scenes/wizard');
 const constants = require('../../constants');
-const {mainMenuKeyboard} = require('../../keyboards/mainMenu');
-const {handleNewReminder} = require('./handleNewReminder');
-const {plantMenuKeyboard} = require('../../keyboards/plantMenu');
+const { mainMenuKeyboard } = require('../../keyboards/mainMenu');
+const { handleNewReminder } = require('./handleNewReminder');
+const { plantMenuKeyboard } = require('../../keyboards/plantMenu');
 
 
 exports.setReminders = function() {
@@ -21,7 +21,7 @@ exports.setReminders = function() {
 
         return ctx.scene.leave();
       } else {
-        ctx.wizard.state.reminders.forEach(async reminder => {
+        for (const reminder of ctx.wizard.state.reminders) {
           if (reminder.name === option) {
             const res = await handleNewReminder(ctx.update.message.chat.id, {
               id: reminder.id,
@@ -33,8 +33,10 @@ exports.setReminders = function() {
             } else {
               ctx.replyWithHTML(constants.reminderFailue);
             }
+
+            break;
           }
-        });
+        }
       }
     }
   )

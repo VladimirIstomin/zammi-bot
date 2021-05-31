@@ -1,4 +1,4 @@
-const {Markup, Extra} = require('telegraf');
+const { Markup, Extra } = require('telegraf');
 const constants = require('../constants');
 
 

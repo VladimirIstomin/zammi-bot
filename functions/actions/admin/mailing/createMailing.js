@@ -1,8 +1,8 @@
 const WizardScene = require('telegraf/scenes/wizard');
 const constants = require('../../../constants');
-const {mailingKeyboard} = require('../../../keyboards/mailing');
-const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
-const {sendMailing} = require('./sendMailing');
+const { mailingKeyboard } = require('../../../keyboards/mailing');
+const { mainMenuKeyboard } = require('../../../keyboards/mainMenu');
+const { sendMailing } = require('./sendMailing');
 
 
 exports.createMailing = function() {
@@ -15,7 +15,6 @@ exports.createMailing = function() {
         ctx.replyWithHTML(constants.requestMailingText);
 
         return ctx.wizard.next();
-
       } else {
         ctx.replyWithHTML(constants.unauthorizedAccess);
 

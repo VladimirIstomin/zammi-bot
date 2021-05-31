@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 
-async function checkUserExists(userId) {
+exports.checkUserExists = async function(userId) {
   const db = admin.firestore();
 
   const userRef = db.collection('users').doc(String(userId));
@@ -9,6 +9,3 @@ async function checkUserExists(userId) {
 
   return user.exists;
 }
-
-
-exports.checkUserExists = checkUserExists;

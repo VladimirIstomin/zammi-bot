@@ -1,7 +1,7 @@
 const WizardScene = require('telegraf/scenes/wizard');
 const constants = require('../../../constants');
-const {mainMenuKeyboard} = require('../../../keyboards/mainMenu');
-const {handleNewAdminPassword} = require('./handleNewAdminPassword');
+const { mainMenuKeyboard } = require('../../../keyboards/mainMenu');
+const { handleNewAdminPassword } = require('./handleNewAdminPassword');
 
 
 exports.setAdminPassword = function() {
@@ -24,17 +24,23 @@ exports.setAdminPassword = function() {
       }
     },
     async ctx => {
-      ctx.deleteMessage();
-      
-      if (handleNewAdminPassword(ctx)) {
-        await ctx.replyWithHTML(constants.newPasswordSuccess);
-      } else {
-        await ctx.replyWithHTML(constants.newPasswordFailure);
-      }
+      if (ctx.message.text === '/stopNewPassword') {
+        ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
 
-      ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
+        return ctx.scene.leave();
+      } else {
+        ctx.deleteMessage();
       
-      return ctx.scene.leave();
+        if (handleNewAdminPassword(ctx.message.text)) {
+          await ctx.replyWithHTML(constants.newPasswordSuccess);
+        } else {
+          await ctx.replyWithHTML(constants.newPasswordFailure);
+        }
+
+        ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
+        
+        return ctx.scene.leave();
+      }
     }
   );
 

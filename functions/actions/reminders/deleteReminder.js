@@ -14,6 +14,7 @@ exports.deleteReminder = async function(userId, reminder) {
     return true
   } catch (e) {
     console.log(e);
+    
     return false;
   }
 }

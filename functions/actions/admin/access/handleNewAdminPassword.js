@@ -1,17 +1,18 @@
 const admin = require('firebase-admin');
-const {deleteAllAdminRights} = require('./deleteAllAdminRights.js');
+const { deleteAllAdminRights } = require('./deleteAllAdminRights.js');
 const bcrypt = require('bcrypt');
 
 
-exports.handleNewAdminPassword = function(ctx) {
+exports.handleNewAdminPassword = async function(password) {
   try {
     const saltRounds = 10;
 
     const db = admin.firestore();
+    
     const passwordRef = db.collection('admin').doc('password');
 
-    bcrypt.hash(ctx.message.text, saltRounds, async (err, hash) => {
-      if (err) {
+    bcrypt.hash(password, saltRounds, async (e, hash) => {
+      if (e) {
         return false;
       }
 

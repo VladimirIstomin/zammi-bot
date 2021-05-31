@@ -1,13 +1,14 @@
 const admin = require('firebase-admin');
 
 
-async function deleteAllAdminRights() {
-  const db = admin.firestore();
+exports.deleteAllAdminRights = async function() {
+  try {
+    const db = admin.firestore();
 
-  const adminsRef = db.collection('admin').doc('admins');
+    const adminsRef = db.collection('admin').doc('admins');
 
-  await adminsRef.set({ids: []});
+    await adminsRef.set({ids: []});
+  } catch (e) {
+    console.log(e);
+  }
 }
-
-
-exports.deleteAllAdminRights = deleteAllAdminRights;

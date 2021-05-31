@@ -68,5 +68,5 @@ node_modules/
 # key for firebase
 serviceAccountKey.json
 
-# Schema of the bot
-bot-schema.pdf
+# Project files
+/project_files

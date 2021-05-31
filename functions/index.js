@@ -1,42 +1,40 @@
 const functions = require('firebase-functions');
 const express = require('express');
 const constants = require('./constants');
-const { mainMenuKeyboard } = require('./keyboards/mainMenu');
 const admin = require('firebase-admin');
+const { mainMenuKeyboard } = require('./keyboards/mainMenu');
 require('firebase-functions/lib/logger/compat');
+const fetch = require('node-fetch');
+require('dotenv').config();
 
-//#region Global settings
+// uncomment the following 15 lines for development purposes
+// let bot;
 
-const app = express();
-app.use(express.urlencoded({extended: true}));
+// let isBotInitialized = false;
+// let botInitializing = false; // false or Promise
 
-let isBotInitialized = false;
-let botInitializing = false; // false or Promise
+// let isAppInitialized = false;
+// let appInitializing = false; // false or Promise
 
-let isAppInitialized = false;
-let appInitializing = false; // false or Promise
+// let reminders = [];
+// let plantsCare = [];
+// let admins = [];
+
+// let isRemindersInitialized = false;
+// let isPlantCareInitialized = false;
+// let isAdminsInitialized = false;
+
+//#region Webhook settings
 
 let isWebhookSet = false;
-let bot;
 
-let reminders = [];
-let plantsCare = [];
-let admins = [];
+const { TELEGRAM_BOT_TOKEN, SERVER_URL } = process.env;
 
 if (!isWebhookSet) {
   setWebhook();
 }
 
-
 function setWebhook() {
-  const fetch = require('node-fetch');
-  require('dotenv').config();
-
-  const {
-    TELEGRAM_BOT_TOKEN,
-    SERVER_URL,
-  } = process.env;
-
   fetch(`${constants.telegramAPI}bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${SERVER_URL}`)
     .then(res => {
       console.log('Webhook has been set with status: ', res.status);
@@ -47,31 +45,50 @@ function setWebhook() {
 
 //#endregion
 
-// comment the next block of code
-// initializeBot();
-// initializeApplication();
+//#region App settings
+
+const app = express();
+app.use(express.urlencoded({extended: true}));
+
+// get request to ping app function and make application warm most of the time
+
+app.get('/', async (req, res) => {
+  await handleInitialization();
+
+  await addListenersIfNecessary();
+  
+  res.send('Make application stay warm!');
+});
 
 
+app.get('/remind', async (req, res) => {
+  const { remind } = require('./actions/reminders/remind');
+  
+  await handleInitialization();
+
+  await remind(bot);
+
+  res.send('Send reminders');
+});
+
+
+// comment the following 4 lines for development purposes
 app.post('/', async (req, res) => {
   await handleInitialization();
 
-  if (reminders.length === 0) {
-    await addRemindersChangeListener();
-  }
+  await addListenersIfNecessary();
 
-  if (plantsCare.length ===0) {
-    await addPlantsCareListener();
-  }
-
-  if (admins.length === 0) {
-    await addAdminsListener();
-  }
+  // uncomment the following 2 lines for development purposes
+  // handleInitialization();
+  // addListenersIfNecessary();
 
   //#region Bot update handlers
   
   bot.start(async ctx => {
     const { createUser } = require('./actions/user/createUser');
     const { checkUserExists } = require('./actions/user/checkUserExists');
+
+    ctx.scene.leave();
 
     await ctx.replyWithHTML(constants.greetings);
     ctx.replyWithHTML(constants.mainMenu, mainMenuKeyboard());
@@ -82,7 +99,9 @@ app.post('/', async (req, res) => {
   });
 
 
-  bot.hears(constants.aboutButton, ctx => {ctx.replyWithHTML(constants.about)});
+  bot.hears(constants.aboutButton, ctx => {
+    ctx.replyWithHTML(constants.about)
+  });
 
 
   bot.hears(constants.ourPlantsButton, ctx => ctx.replyWithHTML(constants.websiteUrl));
@@ -171,18 +190,31 @@ app.post('/', async (req, res) => {
     }
 
     if (plant.length > 1) {
-      throw new Error(`There are more than one plant with name "${plant[0].name}"`);
+      console.log(`Error: There are more than one plant with name "${plant[0].name}"`);
     }
   });
 
   //#endregion
 
+  // comment the following 4 lines for development purposes
   await bot.handleUpdate(req.body);
 
   res.send('Got the post request on the server side!');
 });
 
+//#endregion
+
 //#region Initialization functions
+
+// comment the following 7 lines for development purposes
+let bot;
+
+let isBotInitialized = false;
+let botInitializing = false; // false or Promise
+
+let isAppInitialized = false;
+let appInitializing = false; // false or Promise
+
 
 async function handleInitialization() {
   if (!isAppInitialized && !appInitializing && !isBotInitialized && !botInitializing) {
@@ -210,7 +242,6 @@ async function initializeAll() {
 
 async function initializeApplication() {
   const serviceAccount = require('./serviceAccountKey.json');
-  const admin = require('firebase-admin');
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -236,9 +267,6 @@ async function initializeBot() {
 
   bot = new Telegraf(TELEGRAM_BOT_TOKEN);
 
-  //comment the next line
-  // bot.launch();
-
   const botContext = bot.context;
   botContext.admins = [];
 
@@ -256,6 +284,9 @@ async function initializeBot() {
 
   //#endregion
 
+  // uncomment the following 1 line for development purposes
+  // bot.launch();
+
   isBotInitialized = true;
 
   return false; // botInitializing =  false
@@ -265,19 +296,56 @@ async function initializeBot() {
 
 //#region Database updates listeners
 
+// comment the following 7 lines for development purposes
+let reminders = [];
+let plantsCare = [];
+let admins = [];
+
+let isRemindersInitialized = false;
+let isPlantCareInitialized = false;
+let isAdminsInitialized = false;
+
+
+async function addListenersIfNecessary() {
+  if (reminders.length === 0 && !isRemindersInitialized) {
+    await addRemindersChangeListener(); 
+  }
+
+  if (plantsCare.length === 0 && !isPlantCareInitialized) {
+    await addPlantsCareListener();
+  }
+
+  if (admins.length === 0 && !isAdminsInitialized) {
+    await addAdminsListener();
+  }
+}
+
+
 async function addRemindersChangeListener() {
+  isRemindersInitialized = true;
+
   const db = admin.firestore();
 
   const remindersRef = db.collection('reminders');
 
   const observer = remindersRef.onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
+      let data = change.doc.data();
+
+      if ('reminderSet' in data) {
+        data.reminderSet = processTextFromFirestore(data.reminderSet);
+      }
+
+      if ('reminderText' in data) {
+        data.reminderText = processTextFromFirestore(data.reminderText);
+      }
+
       if (change.type === 'added') {
-        reminders.push({id: change.doc.id, ...change.doc.data()});
+        reminders.push({id: change.doc.id, ...data});
       } else if (change.type === 'modified') {
         reminders.find((reminder, index) => {
           if (reminder.id === change.doc.id) {
-            reminders[index] = change.doc.data();
+            reminders[index] = {id: change.doc.id, ...data};
             return true;
           }
         });
@@ -297,18 +365,26 @@ async function addRemindersChangeListener() {
 
 
 async function addPlantsCareListener() {
+  isPlantCareInitialized = true;
+
   const db = admin.firestore();
 
   const plantsCareRef = db.collection('plantsCare');
 
   const observer = plantsCareRef.onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
+      let data = change.doc.data();
+      
+      if ('careDescription' in data) {
+        data.careDescription = processTextFromFirestore(data.careDescription);
+      }
+
       if (change.type === 'added') {
-        plantsCare.push({id: change.doc.id, ...change.doc.data()});
+        plantsCare.push({id: change.doc.id, ...data});
       } else if (change.type === 'modified') {
         plantsCare.find((reminder, index) => {
           if (reminder.id === change.doc.id) {
-            plantsCare[index] = change.doc.data();
+            plantsCare[index] = {id: change.doc.id, ...data};
             return true;
           }
         });
@@ -321,55 +397,49 @@ async function addPlantsCareListener() {
         });
       }
     });
-
   }, e => console.log(e));
 
   return null;
 }
 
+
 async function addAdminsListener() {
+  isAdminsInitialized = true;
+
   const db = admin.firestore();
 
   const adminsRef = db.collection('admin').doc('admins');
 
   const observer = adminsRef.onSnapshot(snapshot => {
-    snapshot.docChanges().forEach(change => {
-      admins = change.doc.data(); // it's needed to be updated
-
-
-      // if (change.type === 'added') {
-      //   admins.push({id: change.doc.id, ...change.doc.data()});
-      // } else if (change.type === 'modified') {
-      //   admins.find((reminder, index) => {
-      //     if (reminder.id === change.doc.id) {
-      //       plantsCare[index] = change.doc.data();
-      //       return true;
-      //     }
-      //   });
-      // } else if (change.type === 'removed') {
-      //   admins.find((reminder, index) => {
-      //     if (reminder.id === change.doc.id) {
-      //       admins.splice(index, 1);
-      //       return true;
-      //     }
-      //   });
-      // }
-    });
-
+    admins = snapshot.data().ids;
   }, e => console.log(e));
 
   return null;
 }
 
+
+function processTextFromFirestore(text) {
+  return text.replace(/\\n /g, '\n');
+}
+
 //#endregion
+
+//#region Firebase functions
 
 exports.app = functions.https.onRequest(app);
 
 
-exports.remind = functions.pubsub.schedule('0 19 * * *').timeZone('Europe/Moscow').onRun(() => {
-  const { remind } = require('./actions/reminders/remind');
-
-  remind(bot);
+exports.remind = functions.pubsub.schedule('0 19 * * *').timeZone('Europe/Moscow').onRun(async () => {
+  fetch(SERVER_URL + 'remind');
 
   return null;
 });
+
+
+exports.ping = functions.pubsub.schedule('* * * * *').onRun(() => {
+  fetch(SERVER_URL);
+
+  return null;
+});
+
+//#endregion

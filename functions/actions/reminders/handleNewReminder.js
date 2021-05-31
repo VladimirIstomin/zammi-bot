@@ -1,4 +1,4 @@
-const {convertDate} = require('./convertDate');
+const { convertDate } = require('./convertDate');
 const admin = require('firebase-admin');
 
 exports.handleNewReminder = async function(userId, reminder) {
@@ -25,6 +25,7 @@ exports.handleNewReminder = async function(userId, reminder) {
     return true
   } catch (e) {
     console.log(e);
+    
     return false;
   }
 }

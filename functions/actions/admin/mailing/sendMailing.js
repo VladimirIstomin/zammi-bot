@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const {telegramAPITimer} = require('../../timer/telegramAPITimer');
+const { telegramAPITimer } = require('../../timer/telegramAPITimer');
 
 
 exports.sendMailing = async function(ctx) {
@@ -7,33 +7,32 @@ exports.sendMailing = async function(ctx) {
     const db = admin.firestore();
 
     const usersRef = db.collection('users');
-    const users = await usersRef.get();
+    const usersFirestoreObject = await usersRef.get();
 
-    const userIdsArray = [];
+    const users = [];
 
-    if (!users.empty) {
-      users.forEach(user => userIdsArray.push(+user.id));
+    if (!usersFirestoreObject.empty) {
+      usersFirestoreObject.forEach(user => users.push(+user.id));
     }
 
     const mailing = ctx.wizard.state;
 
     if ('photo' in mailing) {
-      for (const userId of userIdsArray) {
+      for (const user of users) {
         try {
-          ctx.telegram.sendPhoto(userId, mailing.photo, {caption: mailing.text, parse_mode: 'HTML'});
-        } catch {
-          throw new Error(`User with id ${userId} didn't get mailing`);
+          ctx.telegram.sendPhoto(user, mailing.photo, {caption: mailing.text, parse_mode: 'HTML'});
+        } catch (e) {
+          console.log(e);
         }
 
         await telegramAPItimer();
       }
     } else {
-      for (const userId of userIdsArray) {
+      for (const user of users) {
         try {
-          ctx.telegram.sendMessage(userId, mailing.text, {parse_mode: 'HTML'});
+          ctx.telegram.sendMessage(user, mailing.text, {parse_mode: 'HTML'});
         } catch (e) {
           console.log(e);
-          throw new Error(`User with id ${userId} didn't get mailing`);
         }
 
         await telegramAPITimer();
@@ -43,6 +42,7 @@ exports.sendMailing = async function(ctx) {
     return true;
   } catch (e) {
     console.log(e);
+
     return false;
   }
 }

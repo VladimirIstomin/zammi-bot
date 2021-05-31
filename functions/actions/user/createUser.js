@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 
-async function createUser(userId) {
+exports.createUser = async function(userId) {
   try {
     const db = admin.firestore();
   
@@ -14,5 +14,3 @@ async function createUser(userId) {
     console.log(e);
   }
 }
-
-exports.createUser = createUser;

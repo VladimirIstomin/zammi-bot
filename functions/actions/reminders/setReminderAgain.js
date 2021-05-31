@@ -1,13 +1,15 @@
-const {handleNewReminder} = require('./handleNewReminder');
+const { handleNewReminder } = require('./handleNewReminder');
 
 exports.setReminderAgain = async function(reminders, userId, reminderId) {
   let reminderDays;
 
-  reminders.forEach(reminder => {
+  for (const reminder of reminders) {
     if (reminder.id === reminderId) {
       reminderDays = reminder.days;
     }
-  });
+
+    break;
+  }
 
   return await handleNewReminder(userId, {id: reminderId, days: reminderDays});
 }
