@@ -66,7 +66,7 @@ app.get('/remind', async (req, res) => {
   
   await handleInitialization();
 
-  await remind(bot);
+  await remind(bot, reminders);
 
   res.send('Send reminders');
 });

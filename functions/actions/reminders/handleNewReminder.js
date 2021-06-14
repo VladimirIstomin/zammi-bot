@@ -1,6 +1,7 @@
 const { convertDate } = require('./convertDate');
 const admin = require('firebase-admin');
 
+
 exports.handleNewReminder = async function(userId, reminder) {
   try {
     const db = admin.firestore();
@@ -10,7 +11,7 @@ exports.handleNewReminder = async function(userId, reminder) {
     const currentDate = Date.now();
 
     let dateToRemind = new Date(currentDate);
-    dateToRemind = dateToRemind.setDate(dateToRemind.getDate() + reminder.days);
+    dateToRemind = dateToRemind.setDate(dateToRemind.getDate() + +reminder.days);
     dateToRemind = convertDate(dateToRemind);
 
     const newReminder = {

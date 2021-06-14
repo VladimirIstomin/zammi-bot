@@ -6,9 +6,8 @@ exports.setReminderAgain = async function(reminders, userId, reminderId) {
   for (const reminder of reminders) {
     if (reminder.id === reminderId) {
       reminderDays = reminder.days;
+      break;
     }
-
-    break;
   }
 
   return await handleNewReminder(userId, {id: reminderId, days: reminderDays});

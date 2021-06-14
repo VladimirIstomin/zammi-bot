@@ -5,7 +5,7 @@ const { deleteReminder } = require('./deleteReminder');
 const { completeActionKeyboard } = require('../../keyboards/completeAction');
 
 
-exports.remind = async function(bot) {
+exports.remind = async function(bot, reminders) {
   try {
     const db = admin.firestore();
 
@@ -20,19 +20,6 @@ exports.remind = async function(bot) {
     if (!usersWithRemindersFirestoreObject.empty) {
       usersWithRemindersFirestoreObject.forEach(user => userWithReminders.push(user.data()));
     }
-
-    const remindersRef = db.collection('reminders');
-    const remindersFirestoreObject = await remindersRef.get(); // pass them as argument
-
-    const allReminders = [];
-
-    if (!remindersFirestoreObject.empty) {
-      remindersFirestoreObject.forEach(reminder => allReminders.push({id: reminder.id, ...reminder.data()}));
-    } else {
-      console.log('Remind function error: There are no reminders');
-
-      return false
-    }
     
     for (const user of userWithReminders) {
       const userReminders = user.reminders;
@@ -42,19 +29,21 @@ exports.remind = async function(bot) {
           try {
             let reminderText;
 
-            for (let reminder of allReminders) {
+            for (let reminder of reminders) {
               if (reminder.id === userReminder.id) {
                 reminderText = reminder.reminderText;
                 break;
               }
             }
 
-            bot.telegram.sendMessage(
-              user.id,
-              reminderText,
-              completeActionKeyboard(userReminder.id)
-            );
-            
+            if (reminderText !== undefined) {
+                bot.telegram.sendMessage(
+                user.id,
+                reminderText,
+                completeActionKeyboard(userReminder.id)
+              );
+            }
+
             const res = await deleteReminder(user.id, userReminder);
 
             if (!res) {
